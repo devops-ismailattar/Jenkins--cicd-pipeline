@@ -36,6 +36,12 @@ pipeline{
                 }
             }
         }
+        
+        stage("update deployment yaml"){
+            steps{
+                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:${DOCKER_TAG}|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+            }
+        }
     }
 }
 
