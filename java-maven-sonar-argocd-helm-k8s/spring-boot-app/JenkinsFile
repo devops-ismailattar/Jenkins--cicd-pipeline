@@ -18,6 +18,18 @@ pipeline{
                 """
             }
         }
+
+        stage("static code analysis"){
+            environment{
+                SONAR_URL = "http://13.232.204.134:9000"
+
+            }
+            steps{
+                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+                }
+            }
+        }
         
         stage("docker build image"){
             // builing image with docker
