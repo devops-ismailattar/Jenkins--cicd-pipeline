@@ -36,6 +36,15 @@ pipeline{
                 }
             }
         }
+        
+        stage("deployment files"){
+            steps{
+                sh """
+                sed -i 's|^ *image:.*|  image: ${DOCKER_IMAGE}:${DOCKER_TAG}|' \
+                java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+                """
+            }
+        }
     }
 }
 
