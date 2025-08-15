@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: attarismail/springboot:489d499364ba5ae3c7045296b2050ffe0586f929
+        image: attarismail/springboot:a8e6f82d930d51d6bc93228e4f69c5d8d2d76499
         ports:
         - containerPort: 8080
