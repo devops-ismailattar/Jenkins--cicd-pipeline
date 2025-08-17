@@ -9,10 +9,18 @@ jobs:
       - name: Say Hello
         run: echo "Hello, Ismail! GitHub Actions is working 🎉"
 
-  show-files:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Show files
-        run: ls -R
+      - name: set up java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: build maven 
+        run: |
+        cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+        mvn clean package
+        
