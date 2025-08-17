@@ -1,7 +1,7 @@
 name: My First Action
- 
+
 on: [push]   # Runs whenever you push to GitHub
- 
+
 jobs:
   hello:
     runs-on: ubuntu-latest
@@ -9,11 +9,10 @@ jobs:
       - name: Say Hello
         run: echo "Hello, Ismail! GitHub Actions is working 🎉"
 
- jobs:
-  hello:
+  show-files:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
-        -name: show files
-         run: ls -R
+      - name: Show files
+        run: ls -R
