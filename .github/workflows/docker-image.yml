@@ -20,7 +20,15 @@ jobs:
       run: |
         cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
         mvn clean package
-        ls -lrth 
+    - name: upload the artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-jar
+        path: target/*.jar
+
+  
+      
+
       
       
 
