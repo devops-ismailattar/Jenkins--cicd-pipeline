@@ -32,6 +32,10 @@ jobs:
         with:
           name: app-jar
           path: java-maven-sonar-argocd-helm-k8s/spring-boot-app/target
+      - name: validate target
+        run: |
+          cd java-maven-sonar-argocd-helm-k8s/spring-boot-app/target
+          ls -lrth 
 
 
 
