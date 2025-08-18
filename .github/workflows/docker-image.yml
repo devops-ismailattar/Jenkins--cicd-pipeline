@@ -11,7 +11,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '21'
+          java-version: '17'
       - name: build with maven
         run: |
           cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
@@ -21,14 +21,3 @@ jobs:
         with:
           name: app-jar
           path: java-maven-sonar-argocd-helm-k8s/spring-boot-app/target/*.jar
-  download-the-artifact:
-    runs-on: ubuntu:latest
-    steps:
-      - name: download the artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: app-jar
-          path: java-maven-sonar-argocd-helm-k8s/spring-boot-app/target
-
-
-
