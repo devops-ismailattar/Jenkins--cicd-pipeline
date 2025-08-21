@@ -1,3 +1,6 @@
+name: my cicd pipeline
+on: [push]
+
 jobs:
   build-with-maven:
     runs-on: ubuntu-latest
