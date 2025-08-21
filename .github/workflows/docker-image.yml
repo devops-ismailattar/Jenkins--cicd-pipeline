@@ -67,6 +67,14 @@ jobs:
           file: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/springboot:${{ github.sha }}
+      - name: Update image in manifests repo
+        run: |
+          cd java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests
+          sed -i "s|image:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/springboot:${{ github.sha }}|" deployment.yml
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git commit -am "Update image to ${{ github.sha }}"
+          git push
         
        
 
