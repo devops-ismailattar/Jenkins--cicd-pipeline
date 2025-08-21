@@ -63,8 +63,8 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./spring-boot-app
-          file: ./spring-boot-app/Dockerfile
+          context: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app
+          file: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/springboot:${{ github.sha }}
         
