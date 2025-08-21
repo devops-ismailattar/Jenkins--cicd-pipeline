@@ -54,7 +54,7 @@ jobs:
       - name: Build Docker image
         run: |
           cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-          run: docker build -t myapp:${{ github.sha }} .
+          docker build -t myapp:${{ github.sha }} .
       - name: login to docker 
         uses: docker/login-action@v3
         with:
