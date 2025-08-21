@@ -27,11 +27,30 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
-      - name: sonarqube qwality checkout
-        id: sonarqube qwality checkout        
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check    
         uses: sonarsource/sonarqube-quality-gate-action@master
         with:
           pollingTimeoutSec: 600
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+  
+  download-the-artifact:
+    runs-on: ubuntu-latest
+    needs: build-with-maven
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4        
+      - name: download the artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: app-jar
+          path: java-maven-sonar-argocd-helm-k8s/spring-boot-app/target
+      - name: validate target
+        run: |
+          cd java-maven-sonar-argocd-helm-k8s/spring-boot-app/target
+          ls -lrth 
+
+
+
