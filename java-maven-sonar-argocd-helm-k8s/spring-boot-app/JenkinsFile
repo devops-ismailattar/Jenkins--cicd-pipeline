@@ -50,6 +50,30 @@ pipeline{
                 }
             }
         }
+
+        stage("update deployment files"){
+            steps{
+                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:${DOCKER_TAG}|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+            }
+        }
+
+        stage("commit changes"){
+            environment{
+                GIT_REPO_NAME = "Jenkins--cicd-pipeline"
+                GIT_USER_NAME = "devops-ismailattar"
+            }
+            steps{
+                withCredentials([string(credentialsId: 'github-creds', variable: 'GITHUB_TOKEN')]) {
+                    sh """
+                    git config user.email "ismail.xyz@gmail.com"
+                    git config user.name "ismail attar"
+                    git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+                    git commit -m "Update deployment image to version ${DOCKER_TAG}"
+                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    """
+                }
+            }
+        }
     }
 }
 
