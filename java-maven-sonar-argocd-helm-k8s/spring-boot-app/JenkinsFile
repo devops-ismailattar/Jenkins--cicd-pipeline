@@ -1,17 +1,10 @@
-pipeline{
+pieline{
     agent any
-    environment{
-        DOCKER_TAG = getDockerTag()
-        SONAR_URL = "http://13.201.52.196:9000/"
+    environment {
+        BUID_NUMBER = getDockerTag()
     }
     stages{
-        stage("code checkout"){
-            steps{
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/devops-ismailattar/Jenkins--cicd-pipeline.git'
-            }
-        }
-
-        stage("mvn build"){
+        stage("build image"){
             steps{
                 sh """
                 cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
@@ -20,44 +13,46 @@ pipeline{
             }
         }
 
-        stage("static code analysis"){
+        stage("sonat scan"){
+            environment{
+                SONAR_URL = "http://13.232.204.134:9000"
+            }
             steps{
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh """
-                    cd  java-maven-sonar-argocd-helm-k8s/spring-boot-app
-                    mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}
-                    """
+                    sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
                 }
             }
         }
 
-        stage("docker build image"){
+        stage("docker build"){
             steps{
                 sh """
                 cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-                docker build -t attarismail/springboot:${DOCKER_TAG} .
+                docker build -t attarismail/springboot:${BUID_NUMBER} .
                 """
+
             }
         }
 
-        stage("docker push image"){
+        stage("push image to docker hub"){
             steps{
-                withCredentials([string(credentialsId: 'docker-cred\'', variable: 'dockerHubPassword')]) {
+                withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerHubPassword')]) {
                     sh """
                     docker login -u attarismail -p ${dockerHubPassword}
-                    docker push attarismail/springboot:${DOCKER_TAG}
+                    docker push attarismail/springboot:${BUID_NUMBER}
                     """
                 }
+
             }
         }
 
         stage("update deployment files"){
             steps{
-                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:${DOCKER_TAG}|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:${BUID_NUMBER}|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
             }
         }
 
-        stage("commit changes"){
+        stage("push code to github"){
             environment{
                 GIT_REPO_NAME = "Jenkins--cicd-pipeline"
                 GIT_USER_NAME = "devops-ismailattar"
@@ -68,7 +63,7 @@ pipeline{
                     git config user.email "ismail.xyz@gmail.com"
                     git config user.name "ismail attar"
                     git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${DOCKER_TAG}"
+                    git commit -m "Update deployment image to version ${BUID_NUMBER}"
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                     """
                 }
