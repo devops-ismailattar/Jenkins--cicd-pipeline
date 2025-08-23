@@ -34,7 +34,7 @@ pipeline{
         stage("docker build image"){
             steps{
                 sh """
-                cd cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                cd  java-maven-sonar-argocd-helm-k8s/spring-boot-app
                 docker push attarismail/springboot:${DOCKER_TAG}
                 """
             }
