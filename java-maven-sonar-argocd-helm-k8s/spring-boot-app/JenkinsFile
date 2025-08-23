@@ -15,7 +15,7 @@ pipeline{
 
         stage("sonat scan"){
             environment{
-                SONAR_URL = "http://13.232.204.134:9000"
+                SONAR_URL = "http://13.201.52.196:9000/"
             }
             steps{
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
