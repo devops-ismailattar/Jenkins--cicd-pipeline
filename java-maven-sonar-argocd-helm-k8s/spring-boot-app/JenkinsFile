@@ -36,7 +36,7 @@ pipeline{
 
         stage("push image to docker hub"){
             steps{
-                withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerHubPassword')]) {
+                withCredentials([string(credentialsId: 'docker-cred\'', variable: 'dockerHubPassword')]) {
                     sh """
                     docker login -u attarismail -p ${dockerHubPassword}
                     docker push attarismail/springboot:${BUID_NUMBER}
