@@ -1,10 +1,12 @@
 pipeline{
     agent any
     environment {
-        BUID_NUMBER = getDockerTag()
+        SONAR_URL = "http://65.1.1.110:9000"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
+
     stages{
-        stage("build image"){
+        stage("build the application") {
             steps{
                 sh """
                 cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
@@ -13,66 +15,62 @@ pipeline{
             }
         }
 
-        stage("sonat scan"){
-            environment{
-                SONAR_URL = "http://13.201.52.196:9000/"
-            }
+        stage("static code analysis") {
             steps{
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
-                }
-            }
-        }
-
-        stage("docker build"){
-            steps{
-                sh """
-                cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-                docker build -t attarismail/springboot:${BUID_NUMBER} .
-                """
-
-            }
-        }
-
-        stage("push image to docker hub"){
-            steps{
-                withCredentials([string(credentialsId: 'docker-cred\'', variable: 'dockerHubPassword')]) {
                     sh """
-                    docker login -u attarismail -p ${dockerHubPassword}
-                    docker push attarismail/springboot:${BUID_NUMBER}
+                    cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                    mvn sonar:sonar \
+                      -Dsonar.login=$SONAR_AUTH_TOKEN \
+                      -Dsonar.host.url=$SONAR_URL
                     """
                 }
-
             }
         }
 
-        stage("update deployment files"){
+        stage("docker build image") {
             steps{
-                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:${BUID_NUMBER}|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+                    sh """
+                    cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                    docker build -t attarismail/springboot:$IMAGE_TAG .
+                    """
+                
             }
         }
 
-        stage("push code to github"){
-            environment{
+        stage("docker push image") {
+            steps{
+                withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerhub_pwd')]) {
+                    sh """
+                    docker login -u attarismail -p $dockerhub_pwd
+                    docker push attarismail/springboot:$IMAGE_TAG
+                    """
+                }
+            }
+        }
+
+        stage("update deployement repo") {
+            environment {
                 GIT_REPO_NAME = "Jenkins--cicd-pipeline"
                 GIT_USER_NAME = "devops-ismailattar"
             }
             steps{
-                withCredentials([string(credentialsId: 'github-creds', variable: 'GITHUB_TOKEN')]) {
+                sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:$IMAGE_TAG|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+            }
+        }
+
+        stage("push changes to github") {
+            steps{
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
                     git config user.email "ismail.xyz@gmail.com"
                     git config user.name "ismail attar"
                     git add java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUID_NUMBER}"
-                    git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                    git commit -m "Update deployment image to version $IMAGE_TAG"
+                    git push https://$GITHUB_TOKEN@github.com/$GIT_USER_NAME/$GIT_REPO_NAME HEAD:main
                     """
                 }
             }
         }
     }
-}
-
-def getDockerTag() {
-    def tag = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-    return tag
 }
