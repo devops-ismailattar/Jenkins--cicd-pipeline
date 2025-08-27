@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: attarismail/springboot:7
+        image: attarismail/springboot:8
         ports:
         - containerPort: 8080
           #ismail
