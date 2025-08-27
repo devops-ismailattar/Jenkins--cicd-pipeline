@@ -50,16 +50,16 @@ pipeline{
         }
 
         stage("update deployement repo") {
-            environment {
-                GIT_REPO_NAME = "Jenkins--cicd-pipeline"
-                GIT_USER_NAME = "devops-ismailattar"
-            }
             steps{
                 sh "sed -i 's|image: attarismail/springboot:.*|image: attarismail/springboot:$IMAGE_TAG|' java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
             }
         }
 
         stage("push changes to github") {
+            environment {
+                GIT_REPO_NAME = "Jenkins--cicd-pipeline"
+                GIT_USER_NAME = "devops-ismailattar"
+            }
             steps{
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh """
